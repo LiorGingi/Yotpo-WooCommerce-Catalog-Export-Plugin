@@ -83,14 +83,11 @@ function gtin($product_id, $type, $mode){ //mode = plugin, type = upc/isbn
 	}
 
 	if(!is_null($result) && !empty($result) && is_string($result)){
-		if (($type == 'upc') && (strlen($result)==12)){
-			return $result;
-		}
-		else if (($type == 'isbn') && (strlen($result)==13)){
-			return $result;
-		}
+		return $result;
 	}
-	return '';
+	else{
+		return '';
+	}
 }
 
 function mpn($product_id, $mode){
@@ -108,7 +105,9 @@ function mpn($product_id, $mode){
 	if(!is_null($result) && !empty($result) && is_string($result)){
 		return $result;
 	}
-	return '';
+	else{
+		return '';
+	}
 }
 
 function brand($product_id, $mode){
@@ -126,7 +125,9 @@ function brand($product_id, $mode){
 	if(!is_null($result) && !empty($result) && is_string($result)){
 		return $result;
 	}
-	return '';
+	else{
+		return '';
+	}
 }
 
 function product_catalog_csv(){
@@ -135,13 +136,14 @@ function product_catalog_csv(){
 		'posts_per_page' => -1
 		);
 	$loop = new WP_Query( $args ); //get the store's catalog
-	$iteration = 0;
 	$saveData = array();
 	$statuses = product_statuses();
 	ob_end_clean();
 	header('Content-type: application/utf-8');
 	header('Content-disposition: attachment; filename="Yotpo Product Catalog.csv"');
 	$fp = fopen('php://output', 'w'); 
+	fputcsv($fp, ['Product ID', 'Product Name', 'Product Description', 'Product URL', 'Product Image URL',
+            'Product Price', 'Currency', 'Spec UPC', 'Spec SKU', 'Spec ISBN', 'Spec Brand', 'Spec MPN', 'Blacklisted', 'Product Group']); //print headers to the file
 	while ( $loop->have_posts() ){
 		$loop->the_post();
 		if (($loop->post->post_status == 'publish') || (in_array($loop->post->post_status, $statuses))){
@@ -162,9 +164,7 @@ function product_catalog_csv(){
 			$saveData['Blacklisted'] = 'false';
 			$saveData['Product Group'] = '';
 
-			if($iteration==0) fputcsv($fp, array_keys($saveData));
 			fputcsv($fp, $saveData);
-			$iteration++;
 		}
 	}
 	fclose($fp);
